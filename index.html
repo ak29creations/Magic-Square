@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DOB Magic Square</title>
+  <style>
+    body{font-family:Arial, sans-serif; background:#f9fafb; color:#111; min-height:100vh; display:flex; align-items:center; justify-content:center;}
+    .app{width:400px; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    h1{text-align:center; font-size:18px; margin-bottom:16px}
+    label{font-size:14px}
+    input[type=date]{width:100%; padding:8px; margin:8px 0 12px; border:1px solid #ccc; border-radius:4px}
+    button{background:#2563eb; border:none; padding:10px 16px; border-radius:4px; color:#fff; cursor:pointer; width:100%}
+    button:hover{background:#1e4ed8}
+    .matrix{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:16px}
+    .cell{background:#f1f5f9; padding:12px; text-align:center; border-radius:4px; font-weight:bold}
+    .meta{text-align:center; margin-top:10px; font-size:14px; color:#555}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Magic Square</h1>
+    <label for="dob">Date of Birth:</label>
+    <input id="dob" type="date" value="1992-08-14" />
+    <button id="make">Make Magic Square</button>
+    <div class="matrix" id="matrix"></div>
+    <div class="meta">Magic constant: <strong id="magic">—</strong></div>
+  </div>
+
+<script>
+  const dobEl = document.getElementById('dob');
+  const makeBtn = document.getElementById('make');
+  const matrixEl = document.getElementById('matrix');
+  const magicEl = document.getElementById('magic');
+
+  function splitYear(y){
+    const yy1 = Math.floor(y/100);
+    const yy2 = y % 100;
+    return [yy1, yy2];
+  }
+
+  function generateFromDate(dateStr){
+    if(!dateStr) return null;
+    const d = new Date(dateStr);
+    if(Number.isNaN(d.getTime())) return null;
+    const DD = d.getDate();
+    const MM = d.getMonth()+1;
+    const YYYY = d.getFullYear();
+    const [YY1, YY2] = splitYear(YYYY);
+
+    const r1 = [DD, MM, YY1, YY2];
+    const r2 = [YY2 + 1, YY1 - 1, MM - 3, DD + 3];
+    const r3 = [MM - 2, DD + 2, YY2 + 2, YY1 - 2];
+    const r4 = [YY1 + 1, YY2 - 1, DD + 1, MM - 1];
+    const grid = [ ...r1, ...r2, ...r3, ...r4 ];
+    return grid;
+  }
+
+  function render(grid){
+    matrixEl.innerHTML = '';
+    grid.forEach(v=>{
+      const div = document.createElement('div');
+      div.className = 'cell';
+      div.textContent = v;
+      matrixEl.appendChild(div);
+    });
+
+    const rows = [];
+    for(let r=0;r<4;r++) rows.push(grid.slice(r*4,(r+1)*4).reduce((a,b)=>a+b,0));
+    magicEl.textContent = rows[0];
+  }
+
+  makeBtn.addEventListener('click', ()=>{
+    const grid = generateFromDate(dobEl.value);
+    if(!grid){ alert('Please pick a valid date'); return; }
+    render(grid);
+  });
+</script>
+</body>
+</html>
